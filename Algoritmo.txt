@@ -1,0 +1,72 @@
+El programa tiene que guardar los datos y resultados en un archivo de texto.
+
+Clases: 
+
+Solicitante
+	Cedula
+	Nom	
+	Ape
+	Telef
+	Cel
+	metodo: Captura()
+	metodo: Registro ()
+Prestamo: 
+	Solicitante
+	Num
+	Cuota_fecha []
+	Fecha_auto
+	Fecha_entrega
+	valor
+	Funcion: Registro()
+	metodo: Captura()
+	metodo: Suma() (¿)
+
+Notas: 
+	Valor y Numero > 0 
+	Find out how to screen cap and show on console 
+	1 > Autorizacion <= 20
+	Entrega_fecha: Autorizacion + 7 
+	Cuota_pago []:
+	Valor_prestamo exists if < tope 
+	Se tendrá que pedir el tiempo de pago? 
+	
+Inicio 
+
+Clase  Solicitante 
+	Cedula, nom, ape, telef, cel, soli
+	Método Registro() 
+		Mostrar “ingrese cedula”
+		Leer (ced)
+		Mostrar “ingrese nombre”
+		Leer (nom)
+		Mostrar “ingrese apellido”
+		Leer (ape)
+		Mostrar “ingrese teléfono fijo”
+		Leer (telef)
+		Mostrar “ingrese teléfono celular”
+		Leer (cel)
+	Fin método
+	Metodo Captura ()
+		Solicitante soli
+		Mostrar (“ la información del solicitante es: “,  soli.registro() )
+	Fin método() 
+Clase Prestamo 
+	Solicitante soli, num, cuota_fecha[], dd, mm, aaaa, fecha_entrega, valor, valor_tope, respuesta
+	Metodo Registro ()
+		While respuesta = “si” do
+		Mostrar “ingrese el numero del préstamo”
+		Leer (num)
+		Mostrar “ingrese el valor del préstamo” 
+		Leer (valor)
+		If valor > valor tope then
+			Mostrar “este préstamo no se podrá realizar”
+		End if 
+		Mostrar “ingrese el dia de autorización del préstamo (dd)” 
+		Leer (dd)
+		If dia_auto > 20 then
+			Mostrar “este préstamo no se puede autorizar”
+		End if 
+		Mostrar “ingrese el mes de autorización del préstamo (mm)” 
+		Leer (mm)
+		Mostrar “ingrese el año de autorización del préstamo (aaaa)”
+		Leer (aaaa)
