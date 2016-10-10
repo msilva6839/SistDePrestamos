@@ -62,15 +62,16 @@ class Solicitante
                 + "Movil: "+ movil;
     }
 }    
-
-class Prestamo
-{
+public class prestamo {
     int N_Prestamo;
     double Credito;
-    double Valor_de_prestamo;
-    String Fecha_autorizacion;
+    double V_prestamo;
     String Fecha_entrega;
     String[] Fecha_pagos = new String[6];
+    boolean siguiente;
+    String seguir;
+
+     
     
     void registro() throws IOException
     {
@@ -78,30 +79,42 @@ class Prestamo
         
         Credito=1000000.00d;
         
-        Calendar c1 = GregorianCalendar.getInstance();
+        while ((siguiente = true) && (V_prestamo<=Credito)) {
+            
+            BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
+
+            try
+            {
+            System.out.print("Ingrese el valor del prestamo a solicitar");
+            V_prestamo = V_prestamo+V_prestamo; 
+            V_prestamo= Double.parseDouble(br.readLine());
+            System.out.print("Quiere hacer otro prestamo? S/N");
+            if (seguir == "S") {
+                // tenemos que hacer que guarde cada prestamo como un recibo
+                siguiente = true;
+            }
+            else {
+                break;
+            }
+
+            }
+            catch(IOException e)
+            {
+              System.err.println("Error: " + e.getMessage());
+            }
+
+        }
         
+        Calendar c1 = GregorianCalendar.getInstance();
+        c1.add(Calendar.DATE ,(7));
+       
         for(int i = 1; i <= 6; i++)
         {
             c1.add(Calendar.MONTH, (i));
-            Fecha_pagos[i] =c1.toString();
+            Fecha_pagos[i] =c1.toString()+ V_prestamo/6;
             
         }
-        
-        BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
-
-        try
-        {
-        System.out.print("Ingrese el valor del prestamo a solicitar");
-        Valor_de_prestamo = Double.parseDouble(br.readLine());
-        
-        }
-        catch(IOException e)
-        {
-            System.err.println("Error: " + e.getMessage());
-        }
     }
-    
-    
 }
 
 public class SistDePrestamos 
