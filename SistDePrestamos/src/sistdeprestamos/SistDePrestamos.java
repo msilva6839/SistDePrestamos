@@ -5,7 +5,6 @@
  */
 package sistdeprestamos;
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 /**
@@ -116,7 +115,6 @@ public class SistDePrestamos
     public static void main(String[] args) 
     {
         // TODO code application logic here
-        //Solicitante sol = new Solicitante();
     }
     
 }
