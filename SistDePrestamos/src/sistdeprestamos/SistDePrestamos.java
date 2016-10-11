@@ -79,11 +79,14 @@ class Prestamo
         Credito=1000000.00d;
         
         Calendar c1 = GregorianCalendar.getInstance();
+        Calendar c2 = GregorianCalendar.getInstance();
+        
+        c2.add(Calendar.DATE,7);
         
         for(int i = 1; i <= 6; i++)
         {
-            c1.add(Calendar.MONTH, (i));
-            Fecha_pagos[i] =c1.toString();
+            c2.add(Calendar.MONTH, (i));
+            Fecha_pagos[i] =c2.toString();
             
         }
         
