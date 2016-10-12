@@ -5,6 +5,7 @@
  */
 package sistdeprestamos;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 /**
@@ -62,58 +63,85 @@ class Solicitante
     }
 }    
 
-class Prestamo
-{
+class Prestamo {
+
     int N_Prestamo;
+    int i;
     double Credito;
     double Valor_de_prestamo;
-    String Fecha_autorizacion;
-    String Fecha_entrega;
+    boolean siguiente;
+    String seguir;
     String[] Fecha_pagos = new String[6];
-    
-    void registro() throws IOException
+
+    void calendario() throws IOException
     {
         //Prestamo tendra que ser leido desde un archivo para seguir una secuencia
-        
-        Credito=1000000.00d;
-        
-        Calendar c1 = GregorianCalendar.getInstance();
+
         Calendar c2 = GregorianCalendar.getInstance();
         Calendar c3 = GregorianCalendar.getInstance();
-        
+
         c2.add(Calendar.DATE,7);
         c3.set(Calendar.DATE,20);
-             
-        if (c1.DATE < c3.DATE)
+
+        if (c2.DATE < c3.DATE) // chequea si la fecha de autorizaciones mayor que fecha tope//
         {
+
             for(int i = 1; i <= 6; i++)
             {
                 c2.add(Calendar.MONTH, (i));
-                Fecha_pagos[i] =c2.toString();
+                Fecha_pagos[i] =c2.toString() + " " + Valor_de_prestamo/6 + " " + N_Prestamo;
 
             }
         }
-        
+
         else
         {
             System.out.print("La fecha de aprobacion exede los primeros 20 dias del mes");
         }
-        
+
+    }
+    void calcular()
+    {
+
         BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
 
-        try
-        {
-        System.out.print("Ingrese el valor del prestamo a solicitar");
-        Valor_de_prestamo = Double.parseDouble(br.readLine());
-        
-        }
-        catch(IOException e)
-        {
-            System.err.println("Error: " + e.getMessage());
-        }
+            try
+            {
+                System.out.print("Ingrese el valor del prestamo a solicitar");
+                while (siguiente == true && Valor_de_prestamo < Credito) 
+                {
+                    Credito=1000000.00d;
+                    N_Prestamo = N_Prestamo + 1;
+                    Valor_de_prestamo = Double.parseDouble(br.readLine());
+                    Valor_de_prestamo = Valor_de_prestamo + Valor_de_prestamo;
+                    
+                    if (Valor_de_prestamo >= Credito) 
+                    {
+                        System.out.println("Usted se ha excedido el limite");
+                        break;
+                    }
+                    
+                    System.out.println("Quiere hacer otro prestamo? S/N");
+                    
+                    seguir = br.readLine();
+                    
+                    if (seguir == "S")
+                    {
+                      siguiente = true;
+                    }
+                }
+
+            }
+            catch(IOException e)
+            {
+                System.err.println("Error: " + e.getMessage());
+            }
     }
-    
-    
+
+    public String capturar() 
+    {
+        return "Fecha de pagos: " + Arrays.toString(Fecha_pagos);
+    }
 }
 
 public class SistDePrestamos 
