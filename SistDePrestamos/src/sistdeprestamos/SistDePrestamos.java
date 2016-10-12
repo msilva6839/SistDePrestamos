@@ -27,31 +27,40 @@ class Solicitante
     {
         BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
         
-        try
-        {            
-        System.out.print("Ingrese la cedula del solicitante: ");
-        cedula = Integer.parseInt(br.readLine());
-
-        System.out.print("Ingrese el nombre del solicitante: ");
-        nombre = br.readLine();
-
-        System.out.print("Ingrese el primer apellido del solicitante: ");
-        apellido1 = br.readLine();
-
-        System.out.print("Ingrese el segundo apellido del solicitante: ");
-        apellido2 = br.readLine();
-
-
-        System.out.print("Ingrese el numero de telefono de habitacion del solicitante: ");
-        telf = br.readLine();
-
-        System.out.print("Ingrese numero de telefono movil del solicitante: ");
-        movil = br.readLine();
-        }
-
-        catch(IOException e)
+        boolean x = true;
+        
+        while (x != false)
         {
-            System.err.println("Error: " + e.getMessage());
+            try
+            {            
+            System.out.print("Ingrese la cedula del solicitante: ");
+            cedula = Integer.parseInt(br.readLine());
+
+            System.out.print("Ingrese el nombre del solicitante: ");
+            nombre = br.readLine();
+
+            System.out.print("Ingrese el primer apellido del solicitante: ");
+            apellido1 = br.readLine();
+
+            System.out.print("Ingrese el segundo apellido del solicitante: ");
+            apellido2 = br.readLine();
+
+
+            System.out.print("Ingrese el numero de telefono de habitacion del solicitante: ");
+            telf = br.readLine();
+
+            System.out.print("Ingrese numero de telefono movil del solicitante: ");
+            movil = br.readLine();
+            
+            x=false;
+            
+            }
+
+            catch(Exception e)
+            {
+                System.err.println("Se produjo un Error: " + e.getMessage() + ".Por favor vuelva a ingresar los datos");
+                //x = true;
+            }
         }
     }
     @Override
@@ -106,35 +115,43 @@ class Prestamo {
 
         BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
 
-        try
+        boolean x = true;
+        
+        while(x!=false)
         {
-            System.out.print("Ingrese el valor del prestamo a solicitar");
-            while (siguiente == true && Valor_de_prestamo < Credito) 
+            try
             {
-                Credito=1000000.00d;
-                N_Prestamo = N_Prestamo + 1;
-                Valor_de_prestamo = Double.parseDouble(br.readLine());
-                Valor_de_prestamo = Valor_de_prestamo + Valor_de_prestamo;
-
-                if (Valor_de_prestamo >= Credito) 
+                System.out.print("Ingrese el valor del prestamo a solicitar");
+                while (siguiente == true && Valor_de_prestamo < Credito) 
                 {
-                    System.out.println("Usted se ha excedido el limite");
-                    break;
+                    Credito=1000000.00d;
+                    N_Prestamo = N_Prestamo + 1;
+                    Valor_de_prestamo = Double.parseDouble(br.readLine());
+                    Valor_de_prestamo = Valor_de_prestamo + Valor_de_prestamo;
+
+                    if (Valor_de_prestamo >= Credito) 
+                    {
+                        System.out.println("Usted se ha excedido el limite");
+                        break;
+                    }
+
+                    System.out.println("Quiere hacer otro prestamo? S/N");
+
+                    seguir = br.readLine();
+
+                    if (seguir == "S")
+                    {
+                      siguiente = true;
+                    }
                 }
-
-                System.out.println("Quiere hacer otro prestamo? S/N");
-
-                seguir = br.readLine();
-
-                if (seguir == "S")
-                {
-                  siguiente = true;
-                }
+                
+                x = false;
             }
-        }
-        catch(IOException e)
-        {
-            System.err.println("Error: " + e.getMessage());
+            catch(Exception e)
+            {
+                System.err.println("Se produjo un Error: " + e.getMessage() + ".Por favor vuelva a ingresar los datos");
+                //x = true
+            }
         }
     }
 
@@ -185,6 +202,8 @@ public class SistDePrestamos
     public static void main(String[] args) throws IOException 
     {
         // TODO code application logic here
+        Solicitante sol = new Solicitante();
+                sol.registrar();
     }
     
 }
