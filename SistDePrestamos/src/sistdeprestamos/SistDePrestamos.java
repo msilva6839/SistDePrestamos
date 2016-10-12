@@ -7,7 +7,9 @@ package sistdeprestamos;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+
 /**
  *
  * @author symq9485
@@ -61,6 +63,10 @@ class Solicitante
                 System.err.println("Se produjo un Error: " + e.getMessage() + ".Por favor vuelva a ingresar los datos");
                 //x = true;
             }
+            finally
+            {
+                System.out.println("Proceso terminado satisfactoriamente.");
+            }
         }
     }
     @Override
@@ -86,25 +92,32 @@ class Prestamo {
     void calendario() throws IOException
     {
         //Prestamo tendra que ser leido desde un archivo para seguir una secuencia
-
+        //Calendar c1 = GregorianCalendar.getInstance();
         Calendar c2 = GregorianCalendar.getInstance();
         Calendar c3 = GregorianCalendar.getInstance();
 
         c2.add(Calendar.DATE,7);
         c3.set(Calendar.DATE,20);
+        
+        Date dDate = c2.getTime();
+        Date sDate = c3.getTime();
+        
+        //System.out.println(dDate);
+        //System.out.println(sDate);
+        
 
-        if (c2.DATE < c3.DATE) // chequea si la fecha de autorizaciones mayor que fecha tope//
+        if (dDate.compareTo(sDate) < 0) // chequea si la fecha de autorizaciones mayor que fecha tope//
         {
 
-            for(int i = 1; i <= 6; i++)
+            for( i = 1; i <= 6; ++i)
             {
                 c2.add(Calendar.MONTH, (i));
-                Fecha_pagos[i] =c2.toString() + " " + Valor_de_prestamo/6 + " " + N_Prestamo;
+                Fecha_pagos[i] =c2.toString() + " " + (Valor_de_prestamo/6) + " " + N_Prestamo;
 
             }
         }
 
-        else
+        else if (dDate.compareTo(sDate) >= 0)
         {
             System.out.print("La fecha de aprobacion exede los primeros 20 dias del mes");
         }
@@ -151,6 +164,10 @@ class Prestamo {
             {
                 System.err.println("Se produjo un Error: " + e.getMessage() + ".Por favor vuelva a ingresar los datos");
                 //x = true
+            }
+            finally
+            {
+                System.out.println("Proceso terminado satisfactoriamente.");
             }
         }
     }
@@ -203,7 +220,10 @@ public class SistDePrestamos
     {
         // TODO code application logic here
         Solicitante sol = new Solicitante();
-                sol.registrar();
+        sol.registrar();
+        Prestamo pres = new Prestamo();
+        pres.calcular();
+        pres.calendario();
+        pres.capturar();
     }
-    
 }
