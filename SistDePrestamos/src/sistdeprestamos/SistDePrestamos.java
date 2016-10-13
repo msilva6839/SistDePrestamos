@@ -89,18 +89,18 @@ class Prestamo {
     String seguir;
     String[] Fecha_pagos = new String[6];
 
-    void calendario() throws IOException
+     void calendario() throws IOException
     {
         //Prestamo tendra que ser leido desde un archivo para seguir una secuencia
         //Calendar c1 = GregorianCalendar.getInstance();
-        Calendar c2 = GregorianCalendar.getInstance();
-        Calendar c3 = GregorianCalendar.getInstance();
+        Calendar fecha_auto = GregorianCalendar.getInstance();
+        Calendar fecha_limite = GregorianCalendar.getInstance();
 
-        c2.add(Calendar.DATE,7);
-        c3.set(Calendar.DATE,20);
+        fecha_auto.add(Calendar.DATE,7);
+        fecha_limite.set(Calendar.DATE,20);
         
-        Date dDate = c2.getTime();
-        Date sDate = c3.getTime();
+        Date dDate = fecha_auto.getTime();
+        Date sDate = fecha_limite.getTime();
         
         //System.out.println(dDate);
         //System.out.println(sDate);
@@ -109,10 +109,10 @@ class Prestamo {
         if (dDate.compareTo(sDate) < 0) // chequea si la fecha de autorizaciones mayor que fecha tope//
         {
 
-            for( i = 1; i <= 6; ++i)
+            for(i = 0; i <= 5; ++i) // tienes que inicializar i en 0 o si no el arreglo no corre // 
             {
-                c2.add(Calendar.MONTH, (i));
-                Fecha_pagos[i] =c2.toString() + " " + (Valor_de_prestamo/6) + " " + N_Prestamo;
+                fecha_auto.add(Calendar.MONTH, (i+1));
+                Fecha_pagos[i] =fecha_auto.toString();
 
             }
         }
@@ -134,11 +134,12 @@ class Prestamo {
         {
             try
             {
-                System.out.print("Ingrese el valor del prestamo a solicitar");
-                while (siguiente == true && Valor_de_prestamo < Credito) 
+                System.out.print("Ingrese el valor del prestamo a solicitar: ");
+                    Valor_de_prestamo = Double.parseDouble(br.readLine());
+                    siguiente = true;
+                    Credito= 10000000.00d; // me voy a matar // 
+                while ((siguiente = true) && (Valor_de_prestamo < Credito)) 
                 {
-                    Credito=1000000.00d;
-                    N_Prestamo = N_Prestamo + 1;
                     Valor_de_prestamo = Double.parseDouble(br.readLine());
                     Valor_de_prestamo = Valor_de_prestamo + Valor_de_prestamo;
 
@@ -147,14 +148,19 @@ class Prestamo {
                         System.out.println("Usted se ha excedido el limite");
                         break;
                     }
-
+                    
+                    N_Prestamo = N_Prestamo + 1;
                     System.out.println("Quiere hacer otro prestamo? S/N");
 
                     seguir = br.readLine();
 
-                    if (seguir == "S")
+                    if ("S".equals(seguir))
                     {
                       siguiente = true;
+                    }
+                    
+                    else if ("N".equals(seguir)){
+                        siguiente = false;
                     }
                 }
                 
