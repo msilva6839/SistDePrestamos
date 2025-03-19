@@ -4,116 +4,167 @@
  * and open the template in the editor.
  */
 package sistdeprestamos;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-/**
- *
- * @author symq9485
- */
+import java.util.*;
 
-class Solicitante
-{
+/**
+ * Sistema de Préstamos
+ */
+class Solicitante {
     int cedula;
-    String nombre; 
+    String nombre;
     String apellido1;
     String apellido2;
     int telf;
     int movil;
-    
-    
-    void registrar() throws IOException 
-    {
-        BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
-        try
-        {            
-        System.out.print("Ingrese la cedula del solicitante: ");
-        cedula = Integer.parseInt(br.readLine());
-        
-        System.out.print("Ingrese el nombre del solicitante: ");
-        nombre = br.readLine();
-        
-        System.out.print("Ingrese el primer apellido del solicitante: ");
-        apellido1 = br.readLine();
-        
-        System.out.print("Ingrese el segundo apellido del solicitante: ");
-        apellido2 = br.readLine();
-        
-        
-        System.out.print("Ingrese el numero de telefono de habitacion del solicitante: ");
-        telf = Integer.parseInt(br.readLine());
-        
-        System.out.print("Ingrese numero de telefono movil del solicitante: ");
-        movil = Integer.parseInt(br.readLine());
-    
-        }
-        catch(IOException e)
-        {
-            System.err.println("Error: " + e.getMessage());
+
+    void registrar(boolean datosCompletos) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.print("Ingrese la cédula del solicitante: ");
+            cedula = Integer.parseInt(br.readLine());
+
+            System.out.print("Ingrese el nombre del solicitante: ");
+            nombre = br.readLine();
+
+            System.out.print("Ingrese el primer apellido del solicitante: ");
+            apellido1 = br.readLine();
+
+            if (datosCompletos) {
+                System.out.print("Ingrese el segundo apellido del solicitante: ");
+                apellido2 = br.readLine();
+
+                System.out.print("Ingrese el número de teléfono de habitación del solicitante: ");
+                telf = Integer.parseInt(br.readLine());
+
+                System.out.print("Ingrese el número de teléfono móvil del solicitante: ");
+                movil = Integer.parseInt(br.readLine());
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error: Entrada inválida. " + e.getMessage());
         }
     }
+
     @Override
-    public String toString() 
-    {
-        return "Nombre: "+ nombre +" Apellidos: "+ apellido1 + " " + apellido2
-                + "Cedula: "+cedula
-                + "Telefono fijo: "+telf
-                + "Movil: "+ movil;
+    public String toString() {
+        return "Nombre: " + nombre + " Apellidos: " + apellido1 + " " + apellido2 +
+                " Cédula: " + cedula +
+                " Teléfono fijo: " + telf +
+                " Móvil: " + movil;
     }
-}    
-
-class Prestamo
-{
-    int N_Prestamo;
-    double Credito;
-    double Valor_de_prestamo;
-    String Fecha_autorizacion;
-    String Fecha_entrega;
-    String[] Fecha_pagos = new String[6];
-    
-    void registro() throws IOException
-    {
-        //Prestamo tendra que ser leido desde un archivo para seguir una secuencia
-        
-        Credito=1000000.00d;
-        
-        Calendar c1 = GregorianCalendar.getInstance();
-        
-        for(int i = 1; i <= 6; i++)
-        {
-            c1.add(Calendar.MONTH, (i));
-            Fecha_pagos[i] =c1.toString();
-            
-        }
-        
-        BufferedReader br = new BufferedReader (new InputStreamReader(System.in));
-
-        try
-        {
-        System.out.print("Ingrese el valor del prestamo a solicitar");
-        Valor_de_prestamo = Double.parseDouble(br.readLine());
-        
-        }
-        catch(IOException e)
-        {
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
-    
-    
 }
 
-public class SistDePrestamos 
-{
+class Prestamo {
+    static final double CREDITO_MAXIMO = 1000000.00;
+    static final int DIAS_ENTREGA = 7;
+    static final int DIAS_PAGO = 30;
+    static final int MAX_CUOTAS = 6;
+    static final int DIAS_AUTORIZACION = 20;
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) 
-    {
-        // TODO code application logic here
-        //Solicitante sol = new Solicitante();
+    int numeroPrestamo;
+    double valorPrestamo;
+    String fechaAutorizacion;
+    String fechaEntrega;
+    String[] fechasPago = new String[MAX_CUOTAS];
+    static double creditoDisponible = CREDITO_MAXIMO;
+
+    void registrar(int numeroPrestamo) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        this.numeroPrestamo = numeroPrestamo;
+
+        try {
+            System.out.print("Ingrese el valor del préstamo a solicitar: ");
+            valorPrestamo = Double.parseDouble(br.readLine());
+
+            if (valorPrestamo <= 0) {
+                System.out.println("El valor del préstamo debe ser mayor a 0.");
+                return;
+            }
+
+            if (valorPrestamo > creditoDisponible) {
+                System.out.println("El valor del préstamo excede el crédito disponible.");
+                return;
+            }
+
+            Calendar calendario = Calendar.getInstance();
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
+
+            // Validar que la fecha de autorización esté dentro de los primeros 20 días del mes
+            int diaActual = calendario.get(Calendar.DAY_OF_MONTH);
+            if (diaActual > DIAS_AUTORIZACION) {
+                System.out.println("Los préstamos solo pueden ser autorizados dentro de los primeros 20 días del mes.");
+                return;
+            }
+
+            // Fecha de autorización
+            fechaAutorizacion = formatoFecha.format(calendario.getTime());
+
+            // Fecha tentativa de entrega (7 días después)
+            calendario.add(Calendar.DAY_OF_MONTH, DIAS_ENTREGA);
+            fechaEntrega = formatoFecha.format(calendario.getTime());
+
+            // Fechas de pago (cada 30 días a partir de la fecha de entrega)
+            for (int i = 0; i < MAX_CUOTAS; i++) {
+                calendario.add(Calendar.DAY_OF_MONTH, DIAS_PAGO);
+                fechasPago[i] = formatoFecha.format(calendario.getTime());
+            }
+
+            // Actualizar crédito disponible
+            creditoDisponible -= valorPrestamo;
+
+            System.out.println("Préstamo registrado exitosamente.");
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Error: Entrada inválida. " + e.getMessage());
+        }
     }
-    
+
+    @Override
+    public String toString() {
+        StringBuilder detalles = new StringBuilder();
+        detalles.append("Número de Préstamo: ").append(numeroPrestamo).append("\n");
+        detalles.append("Valor del Préstamo: ").append(valorPrestamo).append("\n");
+        detalles.append("Fecha de Autorización: ").append(fechaAutorizacion).append("\n");
+        detalles.append("Fecha de Entrega: ").append(fechaEntrega).append("\n");
+        detalles.append("Fechas de Pago: ").append(Arrays.toString(fechasPago)).append("\n");
+        detalles.append("Crédito Disponible: ").append(creditoDisponible).append("\n");
+        return detalles.toString();
+    }
+}
+
+public class SistDePrestamos {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        List<Prestamo> prestamos = new ArrayList<>();
+        int numeroPrestamo = 1;
+
+        while (true) {
+            System.out.println("¿Desea registrar un nuevo préstamo? (s/n): ");
+            String respuesta = br.readLine();
+            if (!respuesta.equalsIgnoreCase("s")) {
+                break;
+            }
+
+            Solicitante solicitante = new Solicitante();
+            System.out.println("¿Desea capturar los datos completos del solicitante? (s/n): ");
+            boolean datosCompletos = br.readLine().equalsIgnoreCase("s");
+            solicitante.registrar(datosCompletos);
+
+            Prestamo prestamo = new Prestamo();
+            prestamo.registrar(numeroPrestamo++);
+            prestamos.add(prestamo);
+
+            System.out.println("Datos del solicitante:");
+            System.out.println(solicitante);
+            System.out.println("Datos del préstamo:");
+            System.out.println(prestamo);
+        }
+
+        System.out.println("Registro de préstamos finalizado.");
+        System.out.println("Préstamos registrados:");
+        for (Prestamo p : prestamos) {
+            System.out.println(p);
+        }
+    }
 }
