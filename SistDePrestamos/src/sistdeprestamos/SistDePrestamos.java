@@ -137,6 +137,7 @@ public class SistDePrestamos {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         List<Prestamo> prestamos = new ArrayList<>();
+        Map<Integer, Solicitante> solicitantes = new HashMap<>(); // Mapa para almacenar solicitantes por cédula
         int numeroPrestamo = 1;
 
         while (true) {
@@ -146,10 +147,21 @@ public class SistDePrestamos {
                 break;
             }
 
-            Solicitante solicitante = new Solicitante();
-            System.out.println("¿Desea capturar los datos completos del solicitante? (s/n): ");
-            boolean datosCompletos = br.readLine().equalsIgnoreCase("s");
-            solicitante.registrar(datosCompletos);
+            Solicitante solicitante;
+            System.out.print("Ingrese la cédula del solicitante: ");
+            int cedula = Integer.parseInt(br.readLine());
+
+            // Verificar si el solicitante ya existe
+            if (solicitantes.containsKey(cedula)) {
+                solicitante = solicitantes.get(cedula);
+                System.out.println("El solicitante ya está registrado. Usando los datos existentes.");
+            } else {
+                solicitante = new Solicitante();
+                System.out.println("¿Desea capturar los datos completos del solicitante? (s/n): ");
+                boolean datosCompletos = br.readLine().equalsIgnoreCase("s");
+                solicitante.registrar(datosCompletos);
+                solicitantes.put(cedula, solicitante); // Guardar el solicitante en el mapa
+            }
 
             Prestamo prestamo = new Prestamo();
             prestamo.registrar(numeroPrestamo++);
