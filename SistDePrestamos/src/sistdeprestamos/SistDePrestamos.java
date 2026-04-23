@@ -1,182 +1,315 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package sistdeprestamos;
 
 import java.io.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Sistema de Préstamos
+ * Sistema de Préstamos — Estructura de Datos, 5to semestre.
  */
 class Solicitante {
     int cedula;
     String nombre;
     String apellido1;
     String apellido2;
-    int telf;
-    int movil;
+    String telf;
+    String movil;
 
-    void registrar(boolean datosCompletos) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        try {
-            System.out.print("Ingrese la cédula del solicitante: ");
-            cedula = Integer.parseInt(br.readLine());
+    /**
+     * Captura los datos del solicitante desde consola.
+     *
+     * @param sc            Scanner de entrada
+     * @param datosCompletos true = captura todos los campos;
+     *                       false = solo nombre y primer apellido
+     */
+    void registrar(Scanner sc, boolean datosCompletos) {
+        System.out.print("Ingrese el primer nombre del solicitante: ");
+        nombre = sc.nextLine().trim();
 
-            System.out.print("Ingrese el nombre del solicitante: ");
-            nombre = br.readLine();
+        System.out.print("Ingrese el primer apellido del solicitante: ");
+        apellido1 = sc.nextLine().trim();
 
-            System.out.print("Ingrese el primer apellido del solicitante: ");
-            apellido1 = br.readLine();
+        if (datosCompletos) {
+            System.out.print("Ingrese el segundo apellido del solicitante: ");
+            apellido2 = sc.nextLine().trim();
 
-            if (datosCompletos) {
-                System.out.print("Ingrese el segundo apellido del solicitante: ");
-                apellido2 = br.readLine();
+            System.out.print("Ingrese el teléfono de casa del solicitante: ");
+            telf = sc.nextLine().trim();
 
-                System.out.print("Ingrese el número de teléfono de habitación del solicitante: ");
-                telf = Integer.parseInt(br.readLine());
-
-                System.out.print("Ingrese el número de teléfono móvil del solicitante: ");
-                movil = Integer.parseInt(br.readLine());
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error: Entrada inválida. " + e.getMessage());
+            System.out.print("Ingrese el teléfono móvil del solicitante: ");
+            movil = sc.nextLine().trim();
         }
     }
 
     @Override
     public String toString() {
-        return "Nombre: " + nombre + " Apellidos: " + apellido1 + " " + apellido2 +
-                " Cédula: " + cedula +
-                " Teléfono fijo: " + telf +
-                " Móvil: " + movil;
+        StringBuilder sb = new StringBuilder();
+        sb.append("  Cédula       : ").append(cedula).append("\n");
+        sb.append("  Nombre       : ").append(nombre).append("\n");
+        sb.append("  Apellidos    : ").append(apellido1);
+        if (apellido2 != null && !apellido2.isEmpty()) {
+            sb.append(" ").append(apellido2);
+        }
+        sb.append("\n");
+        if (telf != null && !telf.isEmpty()) {
+            sb.append("  Tel. fijo    : ").append(telf).append("\n");
+        }
+        if (movil != null && !movil.isEmpty()) {
+            sb.append("  Tel. móvil   : ").append(movil).append("\n");
+        }
+        return sb.toString();
     }
 }
 
 class Prestamo {
-    static final double CREDITO_MAXIMO = 1000000.00;
-    static final int DIAS_ENTREGA = 7;
-    static final int DIAS_PAGO = 30;
-    static final int MAX_CUOTAS = 6;
-    static final int DIAS_AUTORIZACION = 20;
+    // --- Parámetros del sistema ---
+    static final double CREDITO_MAXIMO = 1_000_000.00;
+    static final String FECHA_MAXIMA_STR = "20/12/2025"; // Regla 7: fecha máxima de autorización
+    static final int DIA_LIMITE_AUTORIZACION = 20;       // Regla 6: solo primeros 20 días del mes
+    static final int DIAS_ENTREGA = 7;                   // Regla 4: entrega 7 días después
+    static final int DIAS_PAGO = 30;                     // Regla 5: cuotas cada 30 días
+    static final int MAX_CUOTAS = 6;                     // Máximo 6 cuotas
 
+    static double creditoDisponible = CREDITO_MAXIMO;    // Regla 8: sumatoria no supera el máximo
+
+    // --- Datos del préstamo ---
     int numeroPrestamo;
+    Solicitante solicitante;
     double valorPrestamo;
+    int numeroCuotas;
     String fechaAutorizacion;
     String fechaEntrega;
-    String[] fechasPago = new String[MAX_CUOTAS];
-    static double creditoDisponible = CREDITO_MAXIMO;
+    String[] fechasPago;
 
-    void registrar(int numeroPrestamo) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        this.numeroPrestamo = numeroPrestamo;
+    /**
+     * Registra el préstamo capturando y validando todos los datos necesarios.
+     *
+     * @return true si el préstamo fue registrado correctamente, false en caso contrario.
+     */
+    boolean registrar(Scanner sc, int numPrestamo, Solicitante sol) {
+        this.numeroPrestamo = numPrestamo;
+        this.solicitante = sol;
 
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy");
+        fmt.setLenient(false);
+
+        // --- Valor del préstamo ---
+        System.out.print("Ingrese el valor del préstamo: ");
+        double valor;
         try {
-            System.out.print("Ingrese el valor del préstamo a solicitar: ");
-            valorPrestamo = Double.parseDouble(br.readLine());
-
-            if (valorPrestamo <= 0) {
-                System.out.println("El valor del préstamo debe ser mayor a 0.");
-                return;
-            }
-
-            if (valorPrestamo > creditoDisponible) {
-                System.out.println("El valor del préstamo excede el crédito disponible.");
-                return;
-            }
-
-            Calendar calendario = Calendar.getInstance();
-            SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
-
-            // Validar que la fecha de autorización esté dentro de los primeros 20 días del mes
-            int diaActual = calendario.get(Calendar.DAY_OF_MONTH);
-            if (diaActual > DIAS_AUTORIZACION) {
-                System.out.println("Los préstamos solo pueden ser autorizados dentro de los primeros 20 días del mes.");
-                return;
-            }
-
-            // Fecha de autorización
-            fechaAutorizacion = formatoFecha.format(calendario.getTime());
-
-            // Fecha tentativa de entrega (7 días después)
-            calendario.add(Calendar.DAY_OF_MONTH, DIAS_ENTREGA);
-            fechaEntrega = formatoFecha.format(calendario.getTime());
-
-            // Fechas de pago (cada 30 días a partir de la fecha de entrega)
-            for (int i = 0; i < MAX_CUOTAS; i++) {
-                calendario.add(Calendar.DAY_OF_MONTH, DIAS_PAGO);
-                fechasPago[i] = formatoFecha.format(calendario.getTime());
-            }
-
-            // Actualizar crédito disponible
-            creditoDisponible -= valorPrestamo;
-
-            System.out.println("Préstamo registrado exitosamente.");
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error: Entrada inválida. " + e.getMessage());
+            valor = Double.parseDouble(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Valor inválido.");
+            return false;
         }
+        if (valor <= 0) {
+            System.out.println("Error: El valor del préstamo debe ser mayor a 0.");
+            return false;
+        }
+        if (valor > creditoDisponible) {
+            System.out.printf("Error: El valor excede el crédito disponible (%.2f).%n", creditoDisponible);
+            return false;
+        }
+
+        // --- Número de cuotas (1–6) ---
+        System.out.print("Ingrese el número de cuotas (1-" + MAX_CUOTAS + "): ");
+        int cuotas;
+        try {
+            cuotas = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Número de cuotas inválido.");
+            return false;
+        }
+        if (cuotas < 1 || cuotas > MAX_CUOTAS) {
+            System.out.println("Error: El número de cuotas debe estar entre 1 y " + MAX_CUOTAS + ".");
+            return false;
+        }
+
+        // --- Fecha de autorización ---
+        System.out.print("Ingrese el día de autorización (dd): ");
+        int dia;
+        try {
+            dia = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Día inválido.");
+            return false;
+        }
+        if (dia < 1 || dia > DIA_LIMITE_AUTORIZACION) {
+            System.out.println("Error: Los préstamos solo se pueden autorizar los primeros "
+                    + DIA_LIMITE_AUTORIZACION + " días del mes.");
+            return false;
+        }
+
+        System.out.print("Ingrese el mes de autorización (mm): ");
+        int mes;
+        try {
+            mes = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Mes inválido.");
+            return false;
+        }
+
+        System.out.print("Ingrese el año de autorización (aaaa): ");
+        int anio;
+        try {
+            anio = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Año inválido.");
+            return false;
+        }
+
+        String fechaAutoStr = String.format("%02d/%02d/%04d", dia, mes, anio);
+        Date fechaAuto;
+        try {
+            fechaAuto = fmt.parse(fechaAutoStr);
+        } catch (ParseException e) {
+            System.out.println("Error: Fecha inválida (" + fechaAutoStr + ").");
+            return false;
+        }
+
+        // Verificar que no supere la fecha máxima (Regla 7)
+        try {
+            Date fechaMaxima = fmt.parse(FECHA_MAXIMA_STR);
+            if (fechaAuto.after(fechaMaxima)) {
+                System.out.println("Error: La fecha de autorización supera la fecha máxima permitida ("
+                        + FECHA_MAXIMA_STR + ").");
+                return false;
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException("Fecha máxima interna mal configurada: " + FECHA_MAXIMA_STR, e);
+        }
+
+        // --- Calcular fechas ---
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(fechaAuto);
+
+        // Fecha de entrega = autorización + 7 días (Regla 4)
+        cal.add(Calendar.DAY_OF_MONTH, DIAS_ENTREGA);
+        String entrega = fmt.format(cal.getTime());
+
+        // Fechas de pago: cada 30 días a partir de la fecha de entrega (Regla 5)
+        String[] pagos = new String[cuotas];
+        for (int i = 0; i < cuotas; i++) {
+            cal.add(Calendar.DAY_OF_MONTH, DIAS_PAGO);
+            pagos[i] = fmt.format(cal.getTime());
+        }
+
+        // --- Todo válido: guardar datos y actualizar crédito ---
+        this.valorPrestamo = valor;
+        this.numeroCuotas = cuotas;
+        this.fechaAutorizacion = fechaAutoStr;
+        this.fechaEntrega = entrega;
+        this.fechasPago = pagos;
+        creditoDisponible -= valor;
+
+        return true;
     }
 
     @Override
     public String toString() {
-        StringBuilder detalles = new StringBuilder();
-        detalles.append("Número de Préstamo: ").append(numeroPrestamo).append("\n");
-        detalles.append("Valor del Préstamo: ").append(valorPrestamo).append("\n");
-        detalles.append("Fecha de Autorización: ").append(fechaAutorizacion).append("\n");
-        detalles.append("Fecha de Entrega: ").append(fechaEntrega).append("\n");
-        detalles.append("Fechas de Pago: ").append(Arrays.toString(fechasPago)).append("\n");
-        detalles.append("Crédito Disponible: ").append(creditoDisponible).append("\n");
-        return detalles.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- Préstamo #").append(numeroPrestamo).append(" ---\n");
+        sb.append("Solicitante:\n").append(solicitante);
+        sb.append(String.format("Valor del préstamo  : %.2f%n", valorPrestamo));
+        sb.append("Fecha de autorización: ").append(fechaAutorizacion).append("\n");
+        sb.append("Fecha de entrega     : ").append(fechaEntrega).append("\n");
+        sb.append("Número de cuotas     : ").append(numeroCuotas).append("\n");
+        sb.append("Fechas de pago:\n");
+        for (int i = 0; i < numeroCuotas; i++) {
+            sb.append("  Cuota ").append(i + 1).append(": ").append(fechasPago[i]).append("\n");
+        }
+        sb.append(String.format("Crédito disponible  : %.2f%n", creditoDisponible));
+        return sb.toString();
     }
 }
 
 public class SistDePrestamos {
+
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        Scanner sc = new Scanner(System.in);
         List<Prestamo> prestamos = new ArrayList<>();
-        Map<Integer, Solicitante> solicitantes = new HashMap<>(); // Mapa para almacenar solicitantes por cédula
+        Map<Integer, Solicitante> solicitantes = new HashMap<>();
         int numeroPrestamo = 1;
 
+        System.out.println("=== Sistema de Préstamos ===");
+        System.out.printf("Crédito máximo disponible : %.2f%n", Prestamo.CREDITO_MAXIMO);
+        System.out.println("Fecha máxima de autorización: " + Prestamo.FECHA_MAXIMA_STR);
+
         while (true) {
-            System.out.println("¿Desea registrar un nuevo préstamo? (s/n): ");
-            String respuesta = br.readLine();
-            if (!respuesta.equalsIgnoreCase("s")) {
+            System.out.print("\n¿Desea registrar un nuevo préstamo? (s/n): ");
+            String resp = sc.nextLine().trim();
+            if (!resp.equalsIgnoreCase("s")) {
                 break;
             }
 
-            Solicitante solicitante;
+            // --- Captura del solicitante ---
             System.out.print("Ingrese la cédula del solicitante: ");
-            int cedula = Integer.parseInt(br.readLine());
-
-            // Verificar si el solicitante ya existe
-            if (solicitantes.containsKey(cedula)) {
-                solicitante = solicitantes.get(cedula);
-                System.out.println("El solicitante ya está registrado. Usando los datos existentes.");
-            } else {
-                solicitante = new Solicitante();
-                System.out.println("¿Desea capturar los datos completos del solicitante? (s/n): ");
-                boolean datosCompletos = br.readLine().equalsIgnoreCase("s");
-                solicitante.registrar(datosCompletos);
-                solicitantes.put(cedula, solicitante); // Guardar el solicitante en el mapa
+            int cedula;
+            try {
+                cedula = Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Cédula inválida. Intente de nuevo.");
+                continue;
             }
 
-            Prestamo prestamo = new Prestamo();
-            prestamo.registrar(numeroPrestamo++);
-            prestamos.add(prestamo);
+            Solicitante solicitante;
+            if (solicitantes.containsKey(cedula)) {
+                solicitante = solicitantes.get(cedula);
+                System.out.println("Solicitante ya registrado. Usando datos existentes.");
+            } else {
+                solicitante = new Solicitante();
+                solicitante.cedula = cedula;
+                System.out.print("¿Capturar datos completos del solicitante? (s = completos / n = solo requeridos): ");
+                boolean datosCompletos = sc.nextLine().trim().equalsIgnoreCase("s");
+                solicitante.registrar(sc, datosCompletos);
+                solicitantes.put(cedula, solicitante);
+            }
 
-            System.out.println("Datos del solicitante:");
-            System.out.println(solicitante);
-            System.out.println("Datos del préstamo:");
-            System.out.println(prestamo);
+            // --- Captura del préstamo ---
+            Prestamo prestamo = new Prestamo();
+            if (prestamo.registrar(sc, numeroPrestamo, solicitante)) {
+                numeroPrestamo++;
+                prestamos.add(prestamo);
+                System.out.println("\nPréstamo registrado exitosamente:");
+                System.out.println(prestamo);
+            } else {
+                System.out.println("El préstamo no pudo ser registrado. Intente de nuevo.");
+            }
         }
 
-        System.out.println("Registro de préstamos finalizado.");
-        System.out.println("Préstamos registrados:");
-        for (Prestamo p : prestamos) {
-            System.out.println(p);
+        // --- Resumen final ---
+        System.out.println("\n=== Resumen de Préstamos Registrados ===");
+        if (prestamos.isEmpty()) {
+            System.out.println("No se registraron préstamos.");
+        } else {
+            for (Prestamo p : prestamos) {
+                System.out.println(p);
+            }
+        }
+
+        // --- Guardar en archivo de texto ---
+        guardarEnArchivo(prestamos);
+        System.out.println("Datos guardados en 'prestamos.txt'.");
+    }
+
+    /**
+     * Guarda todos los préstamos registrados en el archivo 'prestamos.txt'.
+     */
+    static void guardarEnArchivo(List<Prestamo> prestamos) throws IOException {
+        String archivo = "prestamos.txt";
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo))) {
+            pw.println("=== Registro de Préstamos ===");
+            pw.println("Generado: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
+            pw.println();
+            if (prestamos.isEmpty()) {
+                pw.println("No se registraron préstamos.");
+            } else {
+                for (Prestamo p : prestamos) {
+                    pw.println(p);
+                }
+            }
+            pw.printf("Crédito restante disponible: %.2f%n", Prestamo.creditoDisponible);
         }
     }
 }
