@@ -1,0 +1,24 @@
+=== Registro de Préstamos ===
+Generado: 23/04/2026 05:38:53
+
+--- Préstamo #1 ---
+Solicitante:
+  Cédula       : 44444444
+  Nombre       : Luis
+  Apellidos    : Sanchez Martinez
+  Tel. fijo    : 22223333
+  Tel. móvil   : 88889999
+Valor del préstamo  : 7500.00
+Fecha de autorización: 01/03/2025
+Fecha de entrega     : 08/03/2025
+Número de cuotas     : 6
+Fechas de pago:
+  Cuota 1: 07/04/2025
+  Cuota 2: 07/05/2025
+  Cuota 3: 06/06/2025
+  Cuota 4: 06/07/2025
+  Cuota 5: 05/08/2025
+  Cuota 6: 04/09/2025
+Crédito disponible  : 992500.00
+
+Crédito restante disponible: 992500.00
