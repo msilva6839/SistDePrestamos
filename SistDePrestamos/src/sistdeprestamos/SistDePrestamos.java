@@ -177,7 +177,7 @@ class Prestamo {
                 return false;
             }
         } catch (ParseException e) {
-            throw new RuntimeException("Fecha máxima interna mal configurada: " + FECHA_MAXIMA_STR, e);
+            throw new IllegalStateException("Configuración interna inválida: FECHA_MAXIMA_STR = " + FECHA_MAXIMA_STR, e);
         }
 
         // --- Calcular fechas ---
